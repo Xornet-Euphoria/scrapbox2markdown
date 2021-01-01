@@ -19,7 +19,7 @@ def parse_block_structure(lines: typing.List[Line]) -> None:
     in_block = False
     for line in lines[1:]:
         if in_block:
-            if line.text == "":
+            if len(line.text) == 0 or line.text[0] != " ":
                 line.block_status = BlockStatus.BLOCKEND
                 in_block = False
             else:
@@ -72,9 +72,23 @@ def parse_header(lines: typing.List[Line], max_header_level) -> None:
 
 
 def parse_list(lines: typing.List[Line]) -> None:
-    for line in lines[1:]:
+    for line in lines:
         if line.type == "list" or line.type == "numlist":
             line.make_list()
+
+
+def parse_code_block(lines: typing.List[Line]) -> None:
+    in_block = False
+    for line in lines:
+        if line.block_status == BlockStatus.BLOCKSTART and line.type == "code":
+            line.make_codeblock()
+            in_block = True
+        elif in_block and line.block_status == BlockStatus.INBLOCK:
+            line.make_codeblock()
+        elif in_block and line.block_status == BlockStatus.BLOCKEND:
+            line.make_codeblock()
+            in_block = False
+
 
 
 def parse_text(text: str, max_header_level: int) -> List:
@@ -84,5 +98,6 @@ def parse_text(text: str, max_header_level: int) -> List:
     set_line_type(lines)
     parse_header(lines, max_header_level)
     parse_list(lines)
+    parse_code_block(lines)
 
     return lines

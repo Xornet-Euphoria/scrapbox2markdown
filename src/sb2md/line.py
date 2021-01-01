@@ -91,6 +91,7 @@ class Line:
         self.__calculate_hierarchy()
         self.__insert_space()
 
+
     def determine_type(self, patterns: typing.Dict[str, typing.Dict]):
         if self.block_status != BlockStatus.NOTIN:
             return
@@ -99,3 +100,14 @@ class Line:
             res = pattern.match(self.__text)
             if res:
                 self.type = linetype
+
+
+    def make_codeblock(self):
+        if self.block_status == BlockStatus.BLOCKSTART:
+            codename = self.__text[5:]
+            self.__text = "```" + codename
+        elif self.block_status == BlockStatus.INBLOCK:
+            # eliminate 1st space
+            self.__text = self.__text[1:]
+        elif self.block_status == BlockStatus.BLOCKEND:
+            self.__text = "```\n" + self.__text
