@@ -11,7 +11,7 @@ def get_args() -> List:
     parser.add_argument("title", help="article title")
     parser.add_argument("--sid", help="If project is private, please specify sid here.")
     parser.add_argument("-o", "--out", help="If specified, markdown file is created. If not, result is written to stdout.")
-    parser.add_argument("--max-header", help="header level of scrapbox that converted to h2", default=4)
+    parser.add_argument("--max-header", help="header level of scrapbox that converted to h2", default=4, type=int)
     return parser.parse_args()
 
 

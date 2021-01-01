@@ -50,7 +50,7 @@ def set_line_type(lines: typing.List[Line]) -> None:
 def process_first_line(lines: typing.List[Line]) -> None:
     first_line = lines[0]
     first_line.block_status = BlockStatus.NOTIN
-    first_line.set_header(1)
+    first_line.set_header(1, add_newline=True)
     first_line.type = "title"
 
 
@@ -65,9 +65,10 @@ def init_lines(raw_lines: typing.List[str]) -> typing.List[Line]:
 
 
 def parse_header(lines: typing.List[Line], max_header_level) -> None:
-    for line in lines[1:]:
+    for i, line in enumerate(lines[1:]):
         if line.type == "header":
-            line.parse_and_set_header(max_header_level)
+            add_newline = (i < len(lines) - 2 and lines[i+1].type != "empty")
+            line.parse_and_set_header(max_header_level, add_newline)
 
 
 def parse_list(lines: typing.List[Line]) -> None:
