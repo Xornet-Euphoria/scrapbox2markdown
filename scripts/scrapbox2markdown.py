@@ -2,7 +2,7 @@ from typing import List
 from sb2md.connect import get_text, APIConnectionError
 from argparse import ArgumentParser
 
-from sb2md.parse import parse_text
+from sb2md.parse import Parser
 
 
 def get_args() -> List:
@@ -29,10 +29,14 @@ def main() -> None:
 
     try:
         text = get_text(project, title, is_private, sid)
-        res = parse_text(text, max_header_level=max_header_level)
-        for line in res:
-            # print(f"|{line.hierarchy}|{line.type}|{line.text}")
-            print(f"{line.text}")
+        parser = Parser(text, max_header_level=max_header_level)
+        parser.parse_lines()
+        res = parser.get_md_text()
+        print(res)
+        # debug
+        # lines = parser.get_lines()
+        # for line in lines:
+            # print(f"[{line.type}]{line.text}")
     except APIConnectionError as err:
         print("[ERROR]: Connection Error Occured.")
         print(f"{err}")

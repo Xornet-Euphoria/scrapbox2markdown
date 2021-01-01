@@ -1,4 +1,3 @@
-from sb2md.parse import parse_text
 from typing import List
 from requests import get
 import typing

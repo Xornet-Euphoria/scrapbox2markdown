@@ -39,16 +39,14 @@ class Line:
     def strip_for_block_start(self):
         self.__text = self.__text.strip()
 
-    def set_header(self, level: int, add_newline: bool=False):
+    def set_header(self, level: int):
         if level < 1:
             raise ValueError("`level` must be positive number")
 
         self.__text = "#"*level + " " + self.__text
 
-        if add_newline:
-            self.__text = self.__text + "\n"
 
-    def parse_and_set_header(self, max_header_level, add_newline: bool=False):
+    def parse_and_set_header(self, max_header_level):
         if self.type != "header":
             return
 
@@ -61,9 +59,9 @@ class Line:
         self.__text = self.__text[pos+1:-1]
 
         if star_cnt > max_header_level:
-            self.set_header(2, add_newline)
+            self.set_header(2)
         else:
-            self.set_header(max_header_level - star_cnt + 2, add_newline)
+            self.set_header(max_header_level - star_cnt + 2)
 
 
     def __calculate_hierarchy(self):
