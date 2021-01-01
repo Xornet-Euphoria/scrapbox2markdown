@@ -12,6 +12,11 @@ class Parser:
             self.__lines.append(Line(raw_line))
         self.__max_header_level = max_header_level
 
+    def do_parse(self):
+        self.parse_lines()
+        self.interpret_lines()
+        self.format_lines()
+
     def parse_lines(self):
         self.process_first_line()
         self.parse_block_structure()
@@ -20,6 +25,14 @@ class Parser:
         self.parse_list()
         self.parse_code_block()
         self.parse_table()
+
+    def interpret_lines(self):
+        # not implemented now
+        pass
+
+    def format_lines(self):
+        self.__insert_newline()
+        self.__create_table_header()
 
     def process_first_line(self) -> None:
         first_line = self.__lines[0]
@@ -102,9 +115,30 @@ class Parser:
                 line.make_table()
                 in_block = False
 
+    def __insert_newline(self):
+        for i, line in enumerate(self.__lines):
+            if line.type != "header" and line.type != "title":
+                continue
+            if i < len(self.__lines) - 1:
+                next_line = self.__lines[i+1]
+                if next_line.type != "empty":
+                    line.insert_newline()
+
+    def __create_table_header(self):
+        for i, line in enumerate(self.__lines):
+            if line.type != "table":
+                continue
+            if i < len(self.__lines) - 1:
+                line.type = "skip"
+                header_line = self.__lines[i+1] 
+                column_cnt = header_line.text.count("|") - 1
+                header_line.insert_table_header(column_cnt)
+
     def get_md_text(self):
         res = ""
         for line in self.__lines:
+            if line.type == "skip":
+                continue
             res += line.text
             res += "\n"
 

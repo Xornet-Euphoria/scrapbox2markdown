@@ -64,6 +64,22 @@ class Line:
             self.set_header(max_header_level - star_cnt + 2)
 
 
+    def insert_newline(self):
+        if self.type != "header" and self.type != "title":
+            return
+        self.__text = self.__text + "\n"
+
+
+    def insert_table_header(self, column_cnt: int):
+        if self.block_status != BlockStatus.INBLOCK:
+            return
+
+        header = "\n|"
+        for i in range(column_cnt):
+            header += "----|"
+        self.__text = self.__text + header
+
+
     def __calculate_hierarchy(self):
         if self.type == "list":
             self.__text = self.__text[1:]

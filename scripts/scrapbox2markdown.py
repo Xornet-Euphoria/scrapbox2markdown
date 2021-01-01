@@ -30,13 +30,13 @@ def main() -> None:
     try:
         text = get_text(project, title, is_private, sid)
         parser = Parser(text, max_header_level=max_header_level)
-        parser.parse_lines()
+        parser.do_parse()
         res = parser.get_md_text()
         print(res)
         # debug
         # lines = parser.get_lines()
         # for line in lines:
-            # print(f"[{line.type}]{line.text}")
+        #     print(f"[{line.type}]{line.text}")
     except APIConnectionError as err:
         print("[ERROR]: Connection Error Occured.")
         print(f"{err}")
