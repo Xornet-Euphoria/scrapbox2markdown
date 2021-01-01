@@ -31,10 +31,10 @@ def main() -> None:
         text = get_text(project, title, is_private, sid)
         res = parse_text(text, max_header_level=max_header_level)
         for line in res:
-            # print(f"{line.block_status}|{line.text}")
+            # print(f"|{line.hierarchy}|{line.type}|{line.text}")
             print(f"{line.text}")
     except Exception as err:
-        raise err
+        # raise err
         print(f"[ERROR] {err}")
         exit(1)
 

@@ -1,6 +1,7 @@
 from typing import List, Union
 from sb2md.line import Line, BlockStatus
 import typing
+import re
 
 
 start_block_elms = ["table:", "code:"]
@@ -29,15 +30,28 @@ def parse_block_structure(lines: typing.List[Line]) -> None:
                 line.strip_for_block_start()
                 in_block = True
                 line.block_status = BlockStatus.BLOCKSTART
-                line.type = block_type[-1]
+                line.type = block_type[:-1]
             else:
                 line.block_status = BlockStatus.NOTIN
+
+
+def set_line_type(lines: typing.List[Line]) -> None:
+    patterns = {
+        "header": re.compile(r"^\[\*+\s.*]"),
+        "quote": re.compile(r"^\>.*"),
+        "list": re.compile(r"^(\t|\s)+.+"),
+        "numlist": re.compile(r"^(\t|\s)*\d+\.\s.+"),
+        "empty": re.compile(r"^(\t|\s)*$")
+    }
+    for line in lines[1:]:
+        line.determine_type(patterns)
 
 
 def process_first_line(lines: typing.List[Line]) -> None:
     first_line = lines[0]
     first_line.block_status = BlockStatus.NOTIN
     first_line.set_header(1)
+    first_line.type = "title"
 
 
 def init_lines(raw_lines: typing.List[str]) -> typing.List[Line]:
@@ -52,17 +66,21 @@ def init_lines(raw_lines: typing.List[str]) -> typing.List[Line]:
 
 def parse_header(lines: typing.List[Line], max_header_level) -> None:
     for line in lines[1:]:
-        line.parse_and_set_header(max_header_level)
+        if line.type == "header":
+            line.parse_and_set_header(max_header_level)
+
 
 def parse_list(lines: typing.List[Line]) -> None:
     for line in lines[1:]:
-        line.make_list()
+        if line.type == "list" or line.type == "numlist":
+            line.make_list()
 
 
 def parse_text(text: str, max_header_level: int) -> List:
     raw_lines = text.split("\n")
     lines = init_lines(raw_lines)
     parse_block_structure(lines)
+    set_line_type(lines)
     parse_header(lines, max_header_level)
     parse_list(lines)
 

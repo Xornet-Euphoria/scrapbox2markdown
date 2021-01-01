@@ -1,5 +1,7 @@
 from enum import Enum, auto
-from typing import Union
+from typing import Dict, Union
+import re
+import typing
 
 
 class BlockStatus(Enum):
@@ -26,7 +28,7 @@ class Line:
         return self.__text
 
     @property
-    def hierarchy(self) -> Union[int, None]:
+    def hierarchy(self) -> int:
         return self.__hierarchy
 
     @property
@@ -46,10 +48,7 @@ class Line:
         self.__header_level = level
 
     def parse_and_set_header(self, max_header_level):
-        if self.block_status != BlockStatus.NOTIN or len(self.__text) < 5:
-            return
-
-        if self.__text[0] != "[" or self.__text[1] != "*" or self.__text[-1] != "]":
+        if self.type != "header":
             return
 
         pos = 1
@@ -66,31 +65,35 @@ class Line:
             self.set_header(max_header_level - star_cnt + 2)
 
     def __calculate_hierarchy(self):
-        if self.__text.strip() == "":
-            self.__hierarchy = 0
-            return
+        if self.type == "list":
+            self.__text = self.__text[1:]
         pos = 0
         while True:
             if self.__text[pos] != " " and self.__text[pos] != "\t":
                 break
-            if self.__text[pos] == "\t":
-                self.__text[pos] == " "
             pos += 1
 
         self.__hierarchy = pos
 
     def __insert_space(self):
-        if self.__hierarchy < 1:
-            raise ValueError("list hierarchy must be larger than or equal to 1")
+        if self.__hierarchy < 0:
+            raise ValueError("list hierarchy must be larger than or equal to 0")
+        prefix = "- " if self.type == "list" else ""
         self.__text = self.__text.lstrip()
-        self.__text = "  " * (self.__hierarchy - 1) + "- " + self.__text
+        self.__text = "  " * self.__hierarchy + prefix + self.__text
 
 
     def make_list(self):
-        if self.block_status != BlockStatus.NOTIN:
+        if self.type != "list" and self.type != "numlist":
             return
         self.__calculate_hierarchy()
-        if self.__hierarchy < 1:
-            return
         self.__insert_space()
 
+    def determine_type(self, patterns: typing.Dict[str, typing.Dict]):
+        if self.block_status != BlockStatus.NOTIN:
+            return
+
+        for linetype, pattern in patterns.items():
+            res = pattern.match(self.__text)
+            if res:
+                self.type = linetype
