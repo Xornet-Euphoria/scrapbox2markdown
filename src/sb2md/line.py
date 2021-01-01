@@ -15,8 +15,9 @@ class Line:
         self.__is_first = is_first
         self.__original_text = text  # don't change
         self.__text = text
-        self.__hierarchy = None
-        self.__block_status = BlockStatus.UNSET
+        self.__hierarchy = -1
+        self.type = None
+        self.block_status = BlockStatus.UNSET
         self.__header_level = -1
 
     # getters
@@ -29,17 +30,13 @@ class Line:
         return self.__hierarchy
 
     @property
-    def block_status(self) -> BlockStatus:
-        return self.__block_status
-
-    @property
     def get_is_first(self) -> bool:
         return self.__is_first
 
-    # setters
-    @block_status.setter
-    def block_status(self, type: BlockStatus):
-        self.__block_status = type
+    # for table and code block in list
+    # These layout is dirty so they are disabled. 
+    def strip_for_block_start(self):
+        self.__text = self.__text.strip()
 
     def set_header(self, level: int):
         if level < 1:
@@ -67,3 +64,33 @@ class Line:
             self.set_header(2)
         else:
             self.set_header(max_header_level - star_cnt + 2)
+
+    def __calculate_hierarchy(self):
+        if self.__text.strip() == "":
+            self.__hierarchy = 0
+            return
+        pos = 0
+        while True:
+            if self.__text[pos] != " " and self.__text[pos] != "\t":
+                break
+            if self.__text[pos] == "\t":
+                self.__text[pos] == " "
+            pos += 1
+
+        self.__hierarchy = pos
+
+    def __insert_space(self):
+        if self.__hierarchy < 1:
+            raise ValueError("list hierarchy must be larger than or equal to 1")
+        self.__text = self.__text.lstrip()
+        self.__text = "  " * (self.__hierarchy - 1) + "- " + self.__text
+
+
+    def make_list(self):
+        if self.block_status != BlockStatus.NOTIN:
+            return
+        self.__calculate_hierarchy()
+        if self.__hierarchy < 1:
+            return
+        self.__insert_space()
+
