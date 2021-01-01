@@ -111,3 +111,14 @@ class Line:
             self.__text = self.__text[1:]
         elif self.block_status == BlockStatus.BLOCKEND:
             self.__text = "```\n" + self.__text
+
+
+    def make_table(self):
+        if self.block_status == BlockStatus.BLOCKSTART:
+            self.__text = ""
+        elif self.block_status == BlockStatus.INBLOCK:
+            self.__text = self.__text.replace(" ", "")
+            self.__text = self.__text.replace("\t", "|")
+            self.__text = f"|{self.__text}|"
+        elif self.block_status == BlockStatus.BLOCKEND:
+            self.__text = ""

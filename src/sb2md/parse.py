@@ -90,6 +90,19 @@ def parse_code_block(lines: typing.List[Line]) -> None:
             in_block = False
 
 
+def parse_table(lines: typing.List[Line]) -> None:
+    in_block = False
+    for line in lines:
+        if line.block_status == BlockStatus.BLOCKSTART and line.type == "table":
+            line.make_table()
+            in_block = True
+        elif in_block and line.block_status == BlockStatus.INBLOCK:
+            line.make_table()
+        elif in_block and line.block_status == BlockStatus.BLOCKEND:
+            line.make_table()
+            in_block = False
+
+
 
 def parse_text(text: str, max_header_level: int) -> List:
     raw_lines = text.split("\n")
@@ -99,5 +112,6 @@ def parse_text(text: str, max_header_level: int) -> List:
     parse_header(lines, max_header_level)
     parse_list(lines)
     parse_code_block(lines)
+    parse_table(lines)
 
     return lines
