@@ -1,5 +1,5 @@
 from typing import List
-from sb2md.connect import get_text
+from sb2md.connect import get_text, APIConnectionError
 from argparse import ArgumentParser
 
 from sb2md.parse import parse_text
@@ -33,10 +33,14 @@ def main() -> None:
         for line in res:
             # print(f"|{line.hierarchy}|{line.type}|{line.text}")
             print(f"{line.text}")
-    except Exception as err:
-        # raise err
-        print(f"[ERROR] {err}")
+    except APIConnectionError as err:
+        print("[ERROR]: Connection Error Occured.")
+        print(f"{err}")
         exit(1)
+    except Exception as err:
+        print("[ERROR]: Unexpected Error")
+        print(f"{err}")
+        raise err
 
 
 if __name__ == "__main__":
